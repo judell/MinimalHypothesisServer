@@ -139,7 +139,7 @@ config.add_route('annotations', '/annotations/{id}')
 app = config.make_wsgi_app()
 
 if __name__ == '__main__': 
-
+    print(f'listening on {server_host}:{server_port}')
     server = make_server(server_host, server_port, app)
     server.serve_forever()
     
