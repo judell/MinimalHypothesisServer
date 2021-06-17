@@ -1,0 +1,92 @@
+extension.bundle.js
+
+async function fetchAnnotationCount(uri) {
+  const altServer = localStorage.getItem('hypothesis.altServer')
+  const apiUrl = altServer ? `https://${altServer}` : 'https://hypothes.is/api'
+  const queryUrl = `${apiUrl}/badge?uri=${encodeUriQuery(uri)}`
+  console.log(queryUrl)
+  const response = await fetch(queryUrl, {
+    credentials: 'include'
+  });
+  const data = await response.json();
+
+  if (data && typeof data.total === 'number') {
+    return data.total;
+  }
+
+  throw new Error('Unable to parse badge response');
+}
+
+sidebar.bundle.js
+
+      let newApiUrl
+
+      const altServer = localStorage.getItem('hypothesis.altServer')
+
+      if (altServer && apiUrl.pathname === '/api/search') {
+         newApiUrl = new URL(`https://${altServer}/search`)
+         newApiUrl.search = apiUrl.search
+         apiUrl = newApiUrl
+      }
+
+      if (altServer && apiUrl.pathname === '/api/annotations') {
+         newApiUrl = new URL(`https://${altServer}/create_annotation`)
+         apiUrl = newApiUrl  
+      }
+
+      const match = apiUrl.pathname.match(/\/api\/(annotations\/\d+)/)
+      if (altServer && match) {
+         newApiUrl = new URL(`https://{altServer}/${match[1]}`)
+         apiUrl = newApiUrl  
+      }
+
+
+      return fetch(apiUrl.toString(), {
+       ...
+
+options/index.html
+
+    <p>Alternate server</p>
+
+    <div>
+      <input id="altServer"></input>
+    </div>
+
+options/options.js
+
+function altServerInput() {
+  return document.getElementById('altServer')
+}
+
+function saveOptions() {
+
+  const altServerInputValue = altServerInput().value === 'undefined' ? '' : altServerInput().value
+
+  chrome.storage.sync.set({
+    badge: badgeCheckbox().checked,
+    altServer: altServerInputValue
+  });
+
+  localStorage.setItem('hypothesis.altServer', altServerInputValue)
+}
+
+function loadOptions() {
+  chrome.storage.sync.get( {
+      badge: true,
+      altServer: ''
+    },
+    function (items) {
+      console.log(items)
+      badgeCheckbox().checked = items.badge
+      altServerInput().value = items.altServer
+    }
+  );
+
+}
+
+document.addEventListener('DOMContentLoaded', loadOptions);
+badgeCheckbox().addEventListener('click', saveOptions);
+altServerInput().addEventListener('change', saveOptions);
+
+
+
