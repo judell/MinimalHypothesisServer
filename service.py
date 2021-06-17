@@ -16,7 +16,7 @@ console.setLevel(logging.DEBUG)
 logger.addHandler(console)
 
 server_scheme = 'http'
-server_host = 'localhost'
+server_host = '0.0.0.0'
 server_port = 4000
 
 if server_port is None:
@@ -54,9 +54,11 @@ def escape_single_quote(str):
 @view_config( route_name='search' )
 def search(request):
     qs = parse_qs(request.query_string)
-    uri = qs['uri'][0]
-    print (uri)
-    sql = f""" select * from annotation where uri = '{uri}' """
+    if 'uri' in qs:
+      uri = qs['uri'][0]
+      sql = f""" select * from annotation where uri = '{uri}' """
+    else:
+      sql = f""" select * from annotation """
     results = read(sql)
     total = len(results)
     rows = []
