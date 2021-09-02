@@ -36,7 +36,7 @@ sidebar.bundle.js
 
       const match = apiUrl.pathname.match(/\/api\/(annotations\/\d+)/)
       if (altServer && match) {
-         newApiUrl = new URL(`https://{altServer}/${match[1]}`)
+         newApiUrl = new URL(`https://${altServer}/${match[1]}`)
          apiUrl = newApiUrl  
       }
 
